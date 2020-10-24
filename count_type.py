@@ -143,7 +143,8 @@ class Logger(object):
                 with open(self.path_to_log, 'a') as time_log:
                     time_log.write("{}\n".format(item))
                 self.queue.task_done()
-        threading.Thread(target=background_logger, daemon=True).start()
+        threading.Thread(target=background_logger, daemon=True,\
+            name="Background {}".format(type(self))).start()
 
 
     def log(self, message: Any):
