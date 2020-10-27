@@ -86,6 +86,13 @@ class Preprocessor(object):
 
 def main():
     preprocessor = Preprocessor("data/excerpt")
+    # choose a tokenizer, by default it is python's split
+    # preprocessor.tokenizer = nltk.tokenize # a function
+
+    # append as many non-tokenizing preprocesses as needed, e.g. lowercase mapping
+    # preprocessor.preprocesses.append( lambda x: [word.lower() for word in x] )
+
+    # run the preprocessing pipeline
     corpus = preprocessor.run()
     for blog, blogger in corpus:
         print(blog[:5], str(blogger))
