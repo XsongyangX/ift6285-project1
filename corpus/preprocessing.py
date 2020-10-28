@@ -21,6 +21,7 @@ class Labels(object):
         """
         self.gender = gender.lower()
         def age_categories(age: int) -> int:
+            age = int(age)
             if 0 <= age <= 19:
                 return 0
             elif 20 <= age <= 29:
