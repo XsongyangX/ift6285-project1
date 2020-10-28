@@ -43,6 +43,7 @@ def main():
         wc = subprocess.run(["wc", os.path.join(args.directory, file), "-l"], capture_output=True, encoding="utf-8")
         results = wc.stdout
         number_of_blogs, _ = results.split()
+        number_of_blogs = int(number_of_blogs)
 
         increment_key(labels.gender, genders, number_of_blogs)
         increment_key(labels.age, ages, number_of_blogs)
