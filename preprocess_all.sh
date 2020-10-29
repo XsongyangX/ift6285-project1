@@ -14,4 +14,4 @@ mkdir -p $logs
 
 # call the preprocessor with pkscreen
 pkscreen bash -c "{ time python corpus/preprocessing.py $data_train $data_train_processed ; } 2> $logs/time_preprocess_train.log"
-pkscreen bash -c "{ time python corpus/preprocessing.py $data_test $data_test_processed ; } 2> $logs/time_preprocess_test.log
+pkscreen bash -c "{ time python corpus/preprocessing.py $data_test $data_test_processed ; } 2> $logs/time_preprocess_test.log"
