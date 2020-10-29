@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Preprocesses the raw corpus and saves a copy of it somewhere
-data_train="/u/felipe/HTML/IFT6285-Automne2020/blogs/"
+data_train="/u/felipe/HTML/IFT6285-Automne2020/blogs/train"
 data_test="/u/felipe/HTML/IFT6285-Automne2020/blogs/test/test1/"
 
 # prepare directories
