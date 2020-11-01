@@ -36,8 +36,8 @@ def main():
             continue
         
         # parse labels
-        _, gender, age, zodiac, _ = file.split('.')
-        labels = Labels(gender, age, zodiac)
+        id, gender, age, zodiac, _ = file.split('.')
+        labels = Labels(id, gender, age, zodiac)
 
         # figure multiplicity
         wc = subprocess.run(["wc", os.path.join(args.directory, file), "-l"], capture_output=True, encoding="utf-8")

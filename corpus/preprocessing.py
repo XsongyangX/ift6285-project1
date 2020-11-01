@@ -3,7 +3,7 @@
 Sets up a preprocessing pipeline
 """
 
-from typing import Callable, Iterator, List, Tuple
+from typing import Callable, Iterator, List, Tuple, Union
 import os
 import pandas as pd
 import argparse
@@ -14,7 +14,7 @@ from pandas.core.frame import DataFrame
 class Labels(object):
     """Represents the labels of a data point (a blog)
     """
-    def __init__(self, gender: str, age: int, zodiac: str):
+    def __init__(self, id: str, gender: str, age: int, zodiac: str):
         """Reads the labels of the blog post and categorizes as needed
 
         Args:
@@ -22,6 +22,7 @@ class Labels(object):
             age (int): Age of the author
             zodiac (str): One of the twelve zodiac signs
         """
+        self.id = id
         self.gender = gender.lower()
         def age_categories(age: int) -> int:
             age = int(age)
@@ -37,7 +38,7 @@ class Labels(object):
         self.zodiac = zodiac
 
     def __str__(self) -> str:
-        return "(Gender: {}, Age: {}, Zodiac: {})".format(self.gender, self.age, self.zodiac)
+        return "(ID: {}, Gender: {}, Age: {}, Zodiac: {})".format(self.id, self.gender, self.age, self.zodiac)
 
 class Preprocessor(object):
     """
@@ -56,7 +57,7 @@ class Preprocessor(object):
         self.preprocesses : List[Callable[[List[str]], List[str]]] = []
         self.tokenizer: Callable[[str], List[str]] = lambda x : x.split()
 
-    def blog_stream(self, return_unparsed_labels: bool = False):
+    def blog_stream(self, return_unparsed_labels: bool = False) -> Iterator[Union[Tuple[str, Labels], Tuple[str, str, str, str, str]]]:
         """Iterates over the corpus directly from disk
         """
         for path in os.listdir(self.path_to_corpus_directory):
@@ -68,7 +69,7 @@ class Preprocessor(object):
                 if return_unparsed_labels:
                     yield row, dataframe['ID'][0], dataframe['Gender'][0], dataframe['Age'][0], dataframe['Zodiac'][0]
                 else:
-                    yield row, Labels(dataframe['Gender'][0], dataframe['Age'][0], dataframe['Zodiac'][0])
+                    yield row, Labels(dataframe['ID'][0], dataframe['Gender'][0], dataframe['Age'][0], dataframe['Zodiac'][0])
 
     def save(self, directory: str):
         """Saves the preprocessed corpus to the directory
