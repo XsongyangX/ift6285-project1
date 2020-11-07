@@ -153,6 +153,28 @@ class Preprocessor():
         for blog, blogger in self.blog_stream():
             yield self.preprocess(blog), blogger
 
+    def run_yield_slice(self, slice_size=100) -> Iterator[List[Tuple[List[str], Labels]]]:
+        """Runs the preprocessor on the corpus and yields slice by slice.
+        A slice is a list of data points.
+
+        Args:
+            slice_size (int, optional): Number of data points per slice. Defaults to 100.
+
+        Yields:
+            Iterator[List[Tuple[List[str], Labels]]]: Iterator over preprocessed data slices
+        """
+        data_stream = self.run_yield()
+        buffer : List[Tuple[List[str], Labels]] = []
+        while True:
+            buffer.clear()
+            try:
+                for _ in range(slice_size):
+                    buffer.append(next(data_stream))
+                yield buffer
+            except StopIteration:
+                break
+        if len(buffer) > 0:
+            yield buffer
 
 def main():
     parser = argparse.ArgumentParser("Runs the full preprocessing pipeline")
