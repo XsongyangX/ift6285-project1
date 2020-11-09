@@ -1,27 +1,21 @@
-# Train using vectorizers saved on disk
+# Fit a vectorizer from the data set and saves it to disk
+# This is where preprocessing is done
 import argparse
 import os
-from pickle import dump, load
+from pickle import dump
 import pandas as pd
 from pandas.core.frame import DataFrame
 
 def get_args():
-    parser = argparse.ArgumentParser(description="Trains a model and saves it to disk")
+    parser = argparse.ArgumentParser(description="Trains a vectorizer and saves it to disk")
 
     parser.add_argument("corpus", help="Directory of the blog csv corpus")
-    parser.add_argument("vectorizer", help="Vectorizer file")
-    parser.add_argument("save", help="Save location for the model")
-
-    parser.add_argument("--label", help="Which label to train for, ex. 'gender' (default), 'age', 'zodiac'",\
-        default="gender")
+    parser.add_argument("save", help="Save location for the vectorizer")
 
     return parser.parse_args()
 
 def main():
     args = get_args()
-
-    # Load vectorizer
-    vectorizer = load(open(args.vectorizer, 'rb'))
 
     # Get corpus
     training_data : DataFrame = None
@@ -32,24 +26,22 @@ def main():
                 training_data = data
             else:
                 training_data = training_data.append(data)
-    
-    # Apply corpus
-    X_train = vectorizer.transform(training_data['blog'])
 
     # EDIT HERE
-    # Train classifier
-    from sklearn.linear_model import LogisticRegression
-    clf = LogisticRegression(C=20, n_jobs=-1, multi_class='ovr')
+    # Fit vectorizer, put preprocessing
+    from sklearn.feature_extraction.text import TfidfVectorizer
+    from nltk.tokenize import TweetTokenizer
+    tweet = TweetTokenizer()
+    vectorizer = TfidfVectorizer(tokenizer=tweet.tokenize, lowercase=False)
 
-    clf.fit(X_train, training_data[args.label])
+    vectorizer.fit(training_data['blog'])
 
-    # Save classifier on disk
+    # Save vectorizer
     save_folder, _ = os.path.split(args.save)
     os.makedirs(save_folder, exist_ok=True)
 
     with open(args.save, "wb") as model:
-        dump(clf, model)
-
-
+        dump(vectorizer, model)
+        
 if __name__ == "__main__":
     main()
