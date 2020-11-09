@@ -5,7 +5,10 @@ Sets up a preprocessing pipeline
 
 import argparse
 import os
+from pickle import dump, load
+from tempfile import TemporaryFile
 import threading
+from threading import Event
 from typing import Callable, Iterator, List, Tuple, Union
 from queue import Queue
 import pandas as pd
@@ -61,6 +64,9 @@ class Preprocessor():
 
         self.preprocesses: List[Callable[[List[str]], List[str]]] = []
         self.tokenizer: Callable[[str], List[str]] = lambda x: x.split()
+
+        self.temp_labels: TemporaryFile
+        self.labels_queue : Queue[Labels]
 
     def blog_stream(self, return_unparsed_labels: bool = False) -> Iterator[Union[Tuple[str, Labels], DataFrame]]:
         """Iterates over the corpus directly from disk
@@ -144,14 +150,24 @@ class Preprocessor():
         """
         return list(self.run_yield())
 
-    def run_yield(self) -> Iterator[Tuple[List[str], Labels]]:
-        """Runs the preprocessor on the corpus and yields data point by data point
+    def run_yield(self, no_dumping=True) -> Iterator[Tuple[List[str], Labels]]:
+        """Runs the preprocessor on the corpus and yields data point by data point.
+        Optionally dumps the processed labels to a tempfile for future use.
 
         Yields:
             Iterator[Tuple[List[str], Labels]]: Iterator over the data points
         """
-        for blog, blogger in self.blog_stream():
-            yield self.preprocess(blog), blogger
+        if no_dumping:
+            for blog, blogger in self.blog_stream():
+                yield self.preprocess(blog), blogger
+        else:
+            finished_event = self.new_dump_labels()
+            for blog, blogger in self.blog_stream():
+                self.dump_labels(blogger)
+                yield self.preprocess(blog), blogger
+            finished_event.set()
+            self.labels_queue.join()
+            self.__dumped_labels = True
 
     def run_yield_slice(self, slice_size=100) -> Iterator[List[Tuple[List[str], Labels]]]:
         """Runs the preprocessor on the corpus and yields slice by slice.
@@ -176,6 +192,42 @@ class Preprocessor():
         if len(buffer) > 0:
             yield buffer
 
+    def new_dump_labels(self) -> Event:
+        """Prepares a new dump for labels
+        """
+        self.temp_labels = TemporaryFile()
+        self.labels_queue = Queue()
+
+        def labels_dumper(stop_event: Event):
+            while self.labels_queue.qsize() != 0 or not stop_event.is_set():
+                labels = self.labels_queue.get()
+                dump(labels, self.temp_labels)
+                self.labels_queue.task_done()
+        finished_queuing = Event()
+        threading.Thread(target=labels_dumper, kwargs={"stop_event":finished_queuing}, daemon=True).start()
+        return finished_queuing
+    
+    def dump_labels(self, labels: Labels):
+        """Dumps the given labels, aynchronously
+        """
+        self.labels_queue.put(labels)
+
+    def load_temp_labels(self) -> Iterator[Labels]:
+        """Opens the temporary file of labels that was previously dumped
+        by self.run_yield
+
+        Yields:
+            Iterator[Labels]: Iterator of labels
+        """
+        if self.__dumped_labels is False:
+            raise Exception("No labels has been dumped yet")
+        self.temp_labels.seek(0) # a low-level requirement
+        while True:
+            try:
+                yield load(self.temp_labels)
+            except EOFError:
+                break
+        
 def main():
     parser = argparse.ArgumentParser("Runs the full preprocessing pipeline")
 
@@ -217,7 +269,11 @@ def main():
     ])
 
     # run the preprocessing pipeline
-    preprocessor.save(args.save)
+    #preprocessor.save(args.save)
+    for blog, blogger in preprocessor.run_yield(no_dumping=False):
+        print(len(blog), blogger, sep='\t')
+    for dumped in preprocessor.load_temp_labels():
+        print(dumped)
 
 
 if __name__ == "__main__":
