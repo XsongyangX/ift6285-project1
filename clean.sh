@@ -4,6 +4,6 @@
 rm data/models -r
 rm data/predictions -r
 
-if [ "$1" != "--keep-vectorizers" ]; then
+if [ "$1" == "--vectorizers" ]; then
     rm data/vectorizers -r
 fi
