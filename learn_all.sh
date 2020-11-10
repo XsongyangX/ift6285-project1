@@ -15,14 +15,16 @@ model=$4
 labels=(gender age zodiac)
 
 if [ "$5" == "--new-vectorizer" ] || [ "$6" == "--new-vectorizer" ]; then
+    mkdir -p data/vectorizers
     python vectorizer.py $corpus data/vectorizers/$vectorizer.vec
 fi
 
 for label in "${labels[@]}"; do
-    if [ $# -eq 4 ]; then
-        ./learn.sh $corpus $test_set $vectorizer $model $label
-    elif [ "$5" == "--distribute" ] || [ "$6" == "--distribute" ]; then
+
+    if [ "$5" == "--distribute" ] || [ "$6" == "--distribute" ]; then
         pkscreen -S learn_$label ssh ens -J arcade \
             "cd ift6285/project1; ./learn.sh $corpus $test_set $vectorizer $model $label"
+    elif [ $# -eq 4 ] || [ "$5" == "--new-vectorizer" ]; then
+        ./learn.sh $corpus $test_set $vectorizer $model $label
     fi
 done

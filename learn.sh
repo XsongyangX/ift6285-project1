@@ -16,10 +16,12 @@ if [ $# -eq 6 ]; then
     python vectorizer.py $corpus data/vectorizers/$vectorizer.vec
 fi
 
+mkdir -p data/models
 python train.py $corpus data/vectorizers/$vectorizer.vec \
     data/models/$label-$model-$vectorizer.model \
     --label $label
 
+mkdir -p data/predictions
 python predict.py $test_set data/models/$label-$model-$vectorizer.model \
     data/vectorizers/$vectorizer.vec data/predictions/$label-$model-$vectorizer.predictions \
     --label $label
