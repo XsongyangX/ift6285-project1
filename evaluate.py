@@ -1,5 +1,6 @@
 # Produces a classification report of the predictions
 import argparse
+import os
 from pickle import load
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
@@ -23,7 +24,11 @@ def plot_confusion(conf_matrix, file_name: str):
     plt.xlabel('Prédiction', fontsize=18)
     plt.ylabel('Vérité', fontsize=18)
     plt.title('Matrice de confusion', fontsize=18)
-    plt.show()
+    
+    # Save plot
+    save_folder, _ = os.path.split(file_name)
+    os.makedirs(save_folder, exist_ok=True)
+    
     plt.savefig(file_name)
 
 def main():
