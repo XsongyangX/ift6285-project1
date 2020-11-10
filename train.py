@@ -24,6 +24,13 @@ def main():
     vectorizer = load(open(args.vectorizer, 'rb'))
 
     # Get corpus
+    def categorize(age: str) -> int:
+        if int(age) <= 19:
+            return 0
+        elif int(age) <= 29:
+            return 1
+        else:
+            return 2
     training_data : DataFrame = None
     for csv_file in os.listdir(args.corpus):
         with open(os.path.join(args.corpus, csv_file), encoding='utf-8') as file:
@@ -32,7 +39,8 @@ def main():
                 training_data = data
             else:
                 training_data = training_data.append(data)
-    
+    training_data['age'] = training_data['age'].apply(categorize)
+
     # Apply corpus
     X_train = vectorizer.transform(training_data['blog'])
 

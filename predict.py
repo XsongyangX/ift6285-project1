@@ -28,6 +28,13 @@ def main():
     model = load(open(args.model, 'rb'))
 
     # Read test set
+    def categorize(age: str) -> int:
+        if int(age) <= 19:
+            return 0
+        elif int(age) <= 29:
+            return 1
+        else:
+            return 2
     test_data : DataFrame = None
     for csv_file in os.listdir(args.test):
         with open(os.path.join(args.test, csv_file), encoding='utf-8') as file:
@@ -36,6 +43,7 @@ def main():
                 test_data = data
             else:
                 test_data = test_data.append(data)
+    test_data['age'] = test_data['age'].apply(categorize)
 
     # Predict
     X_test = vectorizer.transform(test_data['blog'])
