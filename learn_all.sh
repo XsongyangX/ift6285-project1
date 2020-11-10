@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Executes the entire machine learning pipeline
-if [ $# -ne 4 ] && [ $# -ne 5 ]; then
-    echo "Usage: ./learn_all.sh corpus-directory test-directory vectorize-kind model-kind [--distribute]"
+if [ $# -lt 4 ] || [ $# -gt 6 ]; then
+    echo "Usage: ./learn_all.sh corpus-directory test-directory vectorize-kind model-kind [--distribute] [--new-vectorizer]"
     echo "ex. ./learn_all.sh ./data/excerpt ./data/test tfidf logistic --distribute"
     exit 1
 fi
@@ -14,12 +14,14 @@ model=$4
 
 labels=(gender age zodiac)
 
-python vectorizer.py $corpus data/vectorizers/$vectorizer.vec
+if [ $5 == "--new-vectorizer" ] || [ $6 == "--new-vectorizer" ]; then
+    python vectorizer.py $corpus data/vectorizers/$vectorizer.vec
+fi
 
 for label in "${labels[@]}"; do
     if [ $# -eq 4 ]; then
         ./learn.sh $corpus $test_set $vectorizer $model $label
-    elif [ $# -eq 5 ]; then
+    elif [ $5 == "--distribute" ] || [ $6 == "--distribute" ]; then
         pkscreen -S learn_$label ssh ens -J arcade \
             "cd ift6285/project1; ./learn.sh $corpus $test_set $vectorizer $model $label"
     fi
