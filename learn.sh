@@ -2,7 +2,7 @@
 
 # Executes the learning pipeline for a given label
 if [ $# -ne 5 ] && [ $# -ne 6 ]; then
-    echo "Usage: ./learn.sh corpus test-set vectorizer-kind model-kind label [--new-vectorizer]"
+    echo "Usage: ./learn.sh corpus test-set vectorizer_kind model_kind label [--new-vectorizer]"
     echo "ex. ./learn.sh ./data/excerpt ./data/test tfidf logistic gender --new-vectorizer"
 fi
 
@@ -24,6 +24,7 @@ python predict.py $test_set data/models/$label-$model-$vectorizer.model \
     data/vectorizers/$vectorizer.vec data/predictions/$label-$model-$vectorizer.predictions \
     --label $label
 
+mkdir -p data/performances
 python evaluate.py data/predictions/$label-$model-$vectorizer.predictions \
     --plot data/performances/$label-$model-$vectorizer.png \
-    >data/performances/$label-$model-$vectorizer.log
+    > data/performances/$label-$model-$vectorizer.log
