@@ -3,6 +3,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.feature_extraction.text import TfidfVectorizer
 from pickle import load
 import argparse
+import pandas as pd
 
 def get_args():
     parser = argparse.ArgumentParser(description="Finds the properties of the logistic regression model")
@@ -22,13 +23,19 @@ def main():
     int_to_feature = vectorizer.get_feature_names()
 
     # Examine coefficients of the feature matrix
-    for i, label in enumerate(model.classes_):
-        print(label, "top features from logistic regression")
-        word_importance = [abs(x) for x in model.coef_[i]]
-        sorted_word_importance = sorted(zip(word_importance, range(len(model.coef_[i]))),\
-            key=lambda x: x[0], reverse=True)
-        words = [int_to_feature[word] for _,word in sorted_word_importance[:10]]
-        print("\t".join(words))
+    # binary classification case
+    sorted_word_importance = sorted(zip(model.coef_[0], range(len(model.coef_[0]))),\
+        key=lambda x: x[0], reverse=True)
+    ten_largest = sorted_word_importance[:10]
+    ten_smallest = sorted_word_importance[-10:]
+
+    df_largest = pd.DataFrame(ten_largest, columns=["value", "feature"])
+    df_largest["word"] = df_largest["feature"].apply(lambda x: int_to_feature[x])
+    df_smallest = pd.DataFrame(ten_smallest, columns=["value", "feature"])
+    df_smallest["word"] = df_smallest["feature"].apply(lambda x: int_to_feature[x])
+
+    df_largest.to_markdown(open("logistic_words_largest.md", "w"))
+    df_smallest.to_markdown(open("logistic_words_smallest.md", "w"))
 
     # plot bar graphs
     import matplotlib.pyplot as plt
