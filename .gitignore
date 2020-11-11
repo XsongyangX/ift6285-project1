@@ -4,6 +4,7 @@
 __pycache__
 
 accuracies.md
+logistic*.md
 f1s.md
 *.model
 *.vec

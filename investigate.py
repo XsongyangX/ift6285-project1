@@ -27,7 +27,7 @@ def main():
     sorted_word_importance = sorted(zip(model.coef_[0], range(len(model.coef_[0]))),\
         key=lambda x: x[0], reverse=True)
     ten_largest = sorted_word_importance[:20]
-    ten_smallest = sorted_word_importance[-20::-1]
+    ten_smallest = reversed(sorted_word_importance[-20:])
 
     df_largest = pd.DataFrame(ten_largest, columns=["value", "feature"])
     df_largest["word"] = df_largest["feature"].apply(lambda x: int_to_feature[x])
