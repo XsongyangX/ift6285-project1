@@ -26,8 +26,8 @@ def main():
     # binary classification case
     sorted_word_importance = sorted(zip(model.coef_[0], range(len(model.coef_[0]))),\
         key=lambda x: x[0], reverse=True)
-    ten_largest = sorted_word_importance[:10]
-    ten_smallest = sorted_word_importance[-10:]
+    ten_largest = sorted_word_importance[:20]
+    ten_smallest = sorted_word_importance[-20::-1]
 
     df_largest = pd.DataFrame(ten_largest, columns=["value", "feature"])
     df_largest["word"] = df_largest["feature"].apply(lambda x: int_to_feature[x])
@@ -38,11 +38,11 @@ def main():
     df_smallest.to_markdown(open("logistic_words_smallest.md", "w"))
 
     # plot bar graphs
-    import matplotlib.pyplot as plt
-    plt.bar(range(len(model.coef_[0])), model.coef_[0])
-    axes = plt.gca()
-    axes.set_ylim([-3,3])
-    plt.savefig("bar.png")
+    # import matplotlib.pyplot as plt
+    # plt.bar(range(len(model.coef_[0])), model.coef_[0])
+    # axes = plt.gca()
+    # axes.set_ylim([-3,3])
+    # plt.savefig("bar.png")
 
 if __name__ == "__main__":
     main()
